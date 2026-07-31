@@ -2,7 +2,9 @@ mod core;
 mod utils;
 
 use core::{
-    ai_notification::{PendingNotifications, receive, take_pending_ai_notifications},
+    ai_notification::{
+        PendingNotifications, receive, start_ssh_relay, take_pending_ai_notifications,
+    },
     device::start_device_listening,
     gamepad::{start_gamepad_listing, stop_gamepad_listing},
     prevent_default, setup,
@@ -26,6 +28,7 @@ pub fn run() {
             let preference_window = app.get_webview_window(PREFERENCE_WINDOW_LABEL).unwrap();
 
             setup::default(&app_handle, main_window.clone(), preference_window.clone());
+            start_ssh_relay(app_handle.clone());
             receive(&app_handle, &std::env::args().collect::<Vec<_>>(), true);
 
             Ok(())

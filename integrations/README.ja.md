@@ -115,3 +115,39 @@ notify = ["/bin/sh", "/path/to/BongoCat/integrations/bongocat-notify.sh", "codex
 ```
 
 スクリプトは `/Applications/BongoCat.app` と `~/Applications/BongoCat.app` を自動検出します。別の場所へ置く場合は、環境変数 `BONGOCAT_PATH` に `.app/Contents/MacOS/` 内の実行ファイルを指定してください。
+
+## SSH先のCodex / Claude Code
+
+BongoCatは `127.0.0.1:39284` だけでHTTP通知を受け付けます。外部インターフェイスでは待ち受けません。SSHのリバースポートフォワードを使うと、SSH先の同じポートがローカルのBongoCatへ暗号化転送されます。
+
+ローカル側の `~/.ssh/config` で、対象ホストへ次を追加します。
+
+```sshconfig
+Host your-server
+  HostName example.com
+  User your-user
+  RemoteForward 39284 127.0.0.1:39284
+  ExitOnForwardFailure yes
+```
+
+SSH先へ `bongocat-notify.sh` をコピーして実行権限を付け、SSH先のCodexまたはClaude Codeからそのスクリプトを呼びます。
+
+```sh
+mkdir -p ~/.local/bin
+chmod +x ~/.local/bin/bongocat-notify
+```
+
+SSH先の `~/.codex/config.toml` には絶対パスで追加します。
+
+```toml
+notify = ["/bin/sh", "/home/your-user/.local/bin/bongocat-notify", "codex"]
+```
+
+接続中に次のコマンドで中継だけをテストできます。
+
+```sh
+printf '%s' '{"type":"agent-turn-complete","cwd":"/tmp/ssh-test"}' |
+  ~/.local/bin/bongocat-notify codex
+```
+
+SSHサーバー側でTCPフォワーディングが禁止されている場合は、サーバー管理者による `AllowTcpForwarding yes` の設定が必要です。
