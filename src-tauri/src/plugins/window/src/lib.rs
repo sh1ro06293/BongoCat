@@ -11,6 +11,8 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("custom-window")
         .invoke_handler(generate_handler![
             commands::show_window,
+            commands::show_window_by_label,
+            commands::toggle_window_by_label,
             commands::hide_window,
             commands::set_always_on_top,
             commands::set_taskbar_visibility,

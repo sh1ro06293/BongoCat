@@ -47,6 +47,7 @@ export const useCatStore = defineStore('cat', () => {
 
   /** @deprecated 用于标识数据是否已迁移，后续版本将删除 */
   const migrated = ref(false)
+  const performanceMigration = ref(0)
 
   const model = reactive<CatStore['model']>({
     mirror: false,
@@ -54,7 +55,7 @@ export const useCatStore = defineStore('cat', () => {
     motionSound: true,
     behavior: true,
     autoReleaseDelay: 3,
-    maxFPS: 60,
+    maxFPS: 30,
     ignoreMouse: false,
   })
 
@@ -71,22 +72,29 @@ export const useCatStore = defineStore('cat', () => {
   })
 
   const init = () => {
-    if (migrated.value) return
+    if (!migrated.value) {
+      model.mirror = mirrorMode.value
+      model.mouseMirror = mouseMirror.value
 
-    model.mirror = mirrorMode.value
-    model.mouseMirror = mouseMirror.value
+      window.visible = true
+      window.passThrough = penetrable.value
+      window.alwaysOnTop = alwaysOnTop.value
+      window.scale = scale.value
+      window.opacity = opacity.value
 
-    window.visible = true
-    window.passThrough = penetrable.value
-    window.alwaysOnTop = alwaysOnTop.value
-    window.scale = scale.value
-    window.opacity = opacity.value
+      migrated.value = true
+    }
 
-    migrated.value = true
+    if (performanceMigration.value < 1) {
+      if (model.maxFPS === 60) model.maxFPS = 30
+
+      performanceMigration.value = 1
+    }
   }
 
   return {
     migrated,
+    performanceMigration,
     model,
     window,
     init,

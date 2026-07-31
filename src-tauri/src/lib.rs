@@ -11,9 +11,7 @@ use core::{
 };
 use tauri::{Manager, WindowEvent, generate_handler};
 use tauri_plugin_autostart::MacosLauncher;
-use tauri_plugin_custom_window::{
-    MAIN_WINDOW_LABEL, PREFERENCE_WINDOW_LABEL, show_preference_window,
-};
+use tauri_plugin_custom_window::{MAIN_WINDOW_LABEL, show_preference_window};
 use utils::fs_extra::copy_dir;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -25,9 +23,7 @@ pub fn run() {
 
             let main_window = app.get_webview_window(MAIN_WINDOW_LABEL).unwrap();
 
-            let preference_window = app.get_webview_window(PREFERENCE_WINDOW_LABEL).unwrap();
-
-            setup::default(&app_handle, main_window.clone(), preference_window.clone());
+            setup::default(&app_handle, main_window.clone());
             start_ssh_relay(app_handle.clone());
             receive(&app_handle, &std::env::args().collect::<Vec<_>>(), true);
 
@@ -72,7 +68,7 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_locale::init())
         .on_window_event(|window, event| match event {
-            WindowEvent::CloseRequested { api, .. } => {
+            WindowEvent::CloseRequested { api, .. } if window.label() == MAIN_WINDOW_LABEL => {
                 let _ = window.hide();
 
                 api.prevent_close();

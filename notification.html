@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BongoCat Notification</title>
+  </head>
+  <body>
+    <button id="notification" class="notification" type="button" hidden>
+      <span id="icon" class="notification__icon">✓</span>
+      <span class="notification__content">
+        <span class="notification__header">
+          <strong id="provider"></strong>
+          <small id="project"></small>
+        </span>
+        <span id="title" class="notification__title"></span>
+        <span id="message" class="notification__message"></span>
+      </span>
+    </button>
+    <script type="module" src="/src/notification.ts"></script>
+  </body>
+</html>

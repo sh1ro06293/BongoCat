@@ -1,0 +1,121 @@
+:root {
+  color-scheme: dark;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+button {
+  font: inherit;
+}
+
+.notification {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  display: flex;
+  width: calc(100% - 12px);
+  max-height: calc(100% - 18px);
+  box-sizing: border-box;
+  transform: translateX(-50%);
+  gap: 8px;
+  border: 2px solid rgb(52 211 153 / 80%);
+  border-radius: 16px;
+  background: rgb(17 24 39 / 92%);
+  padding: 9px 12px;
+  color: white;
+  font-size: 13px;
+  text-align: left;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 35%);
+  backdrop-filter: blur(8px);
+}
+
+.notification::after {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  border-right: 2px solid rgb(52 211 153 / 80%);
+  border-bottom: 2px solid rgb(52 211 153 / 80%);
+  background: rgb(17 24 39 / 92%);
+  content: '';
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.notification.is-attention {
+  border-color: rgb(251 191 36 / 90%);
+}
+
+.notification.is-error {
+  border-color: rgb(248 113 113 / 90%);
+}
+
+.notification__icon {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgb(52 211 153 / 24%);
+  font-weight: 800;
+}
+
+.is-attention .notification__icon {
+  background: rgb(251 191 36 / 25%);
+}
+
+.is-error .notification__icon {
+  background: rgb(248 113 113 / 25%);
+}
+
+.notification__content,
+.notification__title,
+.notification__message {
+  display: block;
+  min-width: 0;
+}
+
+.notification__content {
+  flex: 1;
+}
+
+.notification__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification small {
+  overflow: hidden;
+  color: rgb(209 213 219);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification__title {
+  font-weight: 700;
+}
+
+.notification__message {
+  display: -webkit-box;
+  overflow: hidden;
+  color: rgb(229 231 235);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}

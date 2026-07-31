@@ -13,6 +13,7 @@ import { nth } from 'es-toolkit/compat'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 import { useAppMenu } from '@/composables/useAppMenu'
+import { useAppShortcuts } from '@/composables/useAppShortcuts'
 import { useDevice } from '@/composables/useDevice'
 import { useGamepad } from '@/composables/useGamepad'
 import { useModel } from '@/composables/useModel'
@@ -38,6 +39,8 @@ const generalStore = useGeneralStore()
 const resizing = ref(false)
 const backgroundImagePath = ref<string>()
 const { stickActive } = useGamepad()
+
+useAppShortcuts()
 
 onMounted(startListening)
 

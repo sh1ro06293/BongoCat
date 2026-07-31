@@ -14,6 +14,29 @@ notify = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
 
 Codex が末尾に追加する JSON 引数をスクリプトが BongoCat へ転送します。Codex CLI/TUI の `agent-turn-complete` に対応します。
 
+承認待ちも受け取るには、`~/.codex/hooks.json` の `hooks` に次を追加します。既存の hooks がある場合は上書きせず、`PermissionRequest` の配列へ要素を追加してください。
+
+```json
+{
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"D:\\hal\\BongoCat\\integrations\\bongocat-notify.ps1\" -Provider codex",
+            "timeout": 3,
+            "statusMessage": "Notifying BongoCat"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Codex を再起動し、最初の一度だけ `/hooks` を開いてこのコマンドを許可します。この確認は Codex の安全機能なので省略できません。
+
 ### Claude Code
 
 `~/.claude/settings.json` の `hooks` に次を追加します。既存の hooks がある場合は上書きせず、各配列へ要素を追加してください。
@@ -72,6 +95,29 @@ chmod +x /path/to/BongoCat/integrations/bongocat-notify.sh
 ```toml
 notify = ["/bin/sh", "/path/to/BongoCat/integrations/bongocat-notify.sh", "codex"]
 ```
+
+承認待ちも受け取るには、`~/.codex/hooks.json` の `hooks` に追加します。
+
+```json
+{
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh /path/to/BongoCat/integrations/bongocat-notify.sh codex",
+            "timeout": 3,
+            "statusMessage": "Notifying BongoCat"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Codex を再起動し、最初の一度だけ `/hooks` を開いてこのコマンドを許可します。
 
 ### Claude Code
 
@@ -143,6 +189,8 @@ SSH先の `~/.codex/config.toml` には絶対パスで追加します。
 notify = ["/bin/sh", "/home/your-user/.local/bin/bongocat-notify", "codex"]
 ```
 
+承認待ちはSSH先の `~/.codex/hooks.json` にも `PermissionRequest` フックを追加します。Windowsの自動設定スクリプトを使う場合は自動で追加されます。設定後、SSH先のCodexを再起動し、最初の一度だけ `/hooks` で許可してください。
+
 接続中に次のコマンドで中継だけをテストできます。
 
 ```sh
@@ -165,7 +213,7 @@ SSHサーバー側でTCPフォワーディングが禁止されている場合�
 - Windowsの `~/.ssh/config` をバックアップ
 - 対象ホストだけに `RemoteForward` を追加
 - SSH先の `~/.local/bin` に通知スクリプトを配置
-- SSH先のCodex設定をバックアップして `notify` を追加
+- SSH先のCodex設定をバックアップして、完了通知と承認待ちフックを追加
 - SSH先にClaude Code設定があれば、既存hooksを残して通知hooksを追加
 
 設定後は一度SSH接続を切り、通常どおり再接続してください。

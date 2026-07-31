@@ -9,6 +9,7 @@ use std::{
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tauri::{AppHandle, Manager};
+use tauri_plugin_custom_window::ensure_ai_notification_window;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -29,6 +30,8 @@ fn enqueue(app: &AppHandle, notification: AiNotification) {
             pending.push(notification);
         }
     }
+
+    ensure_ai_notification_window(app);
 }
 
 fn text(value: &Value, keys: &[&str]) -> Option<String> {
@@ -88,8 +91,17 @@ fn notification_from_value(provider: &str, value: &Value) -> Option<AiNotificati
             "error_details",
         ],
     )
+    .or_else(|| {
+        value
+            .get("tool_input")
+            .and_then(|input| text(input, &["description"]))
+    })
     .unwrap_or_else(|| {
-        if provider == "codex" {
+        if event == "PermissionRequest" {
+            let tool = text(value, &["tool_name"]).unwrap_or_else(|| "Codex".into());
+
+            format!("{tool} is waiting for approval")
+        } else if provider == "codex" {
             "Codex のターンが完了しました".into()
         } else {
             "Claude Code の応答が完了しました".into()
@@ -288,6 +300,18 @@ mod tests {
 
         assert_eq!(notification.status, "attention");
         assert_eq!(notification.message, "Claude needs permission");
+    }
+
+    #[test]
+    fn parses_codex_permission_request() {
+        let notification = notification_from_args(&args(
+            "codex",
+            r#"{"hook_event_name":"PermissionRequest","tool_name":"Bash","tool_input":{"description":"Run the release build"},"cwd":"C:\\work\\demo"}"#,
+        ))
+        .unwrap();
+
+        assert_eq!(notification.status, "attention");
+        assert_eq!(notification.message, "Run the release build");
     }
 
     #[test]
