@@ -15,14 +15,14 @@ if ([string]::IsNullOrWhiteSpace($payload)) {
   $payload = '{}'
 }
 
-$candidates = @(
+$candidates = @(@(
   $env:BONGOCAT_PATH,
   (Join-Path $env:LOCALAPPDATA 'BongoCat\BongoCat.exe'),
   (Join-Path $PSScriptRoot '..\src-tauri\target\release\bongo-cat.exe'),
   (Join-Path $PSScriptRoot '..\target\release\bongo-cat.exe'),
   (Join-Path $PSScriptRoot '..\src-tauri\target\debug\bongo-cat.exe'),
   (Join-Path $PSScriptRoot '..\target\debug\bongo-cat.exe')
-) | Where-Object { $_ -and (Test-Path -LiteralPath $_) }
+) | Where-Object { $_ -and (Test-Path -LiteralPath $_) })
 
 if ($candidates.Count -eq 0) {
   try {
