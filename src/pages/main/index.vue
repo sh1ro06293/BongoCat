@@ -12,6 +12,7 @@ import { round } from 'es-toolkit'
 import { nth } from 'es-toolkit/compat'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
+import AiNotification from '@/components/ai-notification/index.vue'
 import { useAppMenu } from '@/composables/useAppMenu'
 import { useDevice } from '@/composables/useDevice'
 import { useGamepad } from '@/composables/useGamepad'
@@ -196,6 +197,8 @@ function handleMouseMove(event: MouseEvent) {
     >
 
     <canvas id="live2dCanvas" />
+
+    <AiNotification :mirrored="catStore.model.mirror" />
 
     <img
       v-for="path in modelStore.pressedKeys"

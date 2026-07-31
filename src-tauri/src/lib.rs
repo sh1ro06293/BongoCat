@@ -2,6 +2,7 @@ mod core;
 mod utils;
 
 use core::{
+    ai_notification::{PendingNotifications, receive, take_pending_ai_notifications},
     device::start_device_listening,
     gamepad::{start_gamepad_listing, stop_gamepad_listing},
     prevent_default, setup,
@@ -16,6 +17,7 @@ use utils::fs_extra::copy_dir;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app = tauri::Builder::default()
+        .manage(PendingNotifications::default())
         .setup(|app| {
             let app_handle = app.handle();
 
@@ -24,11 +26,13 @@ pub fn run() {
             let preference_window = app.get_webview_window(PREFERENCE_WINDOW_LABEL).unwrap();
 
             setup::default(&app_handle, main_window.clone(), preference_window.clone());
+            receive(&app_handle, &std::env::args().collect::<Vec<_>>(), true);
 
             Ok(())
         })
         .invoke_handler(generate_handler![
             copy_dir,
+            take_pending_ai_notifications,
             start_device_listening,
             start_gamepad_listing,
             stop_gamepad_listing
@@ -42,8 +46,10 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(prevent_default::init())
         .plugin(tauri_plugin_single_instance::init(
-            |app_handle, _argv, _cwd| {
-                show_preference_window(app_handle);
+            |app_handle, argv, _cwd| {
+                if !receive(app_handle, &argv, false) {
+                    show_preference_window(app_handle);
+                }
             },
         ))
         .plugin(

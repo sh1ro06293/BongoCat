@@ -1,0 +1,117 @@
+# Claude Code / Codex 通知連携
+
+BongoCat を起動した状態で、AI エージェントの完了・入力待ち・失敗を猫の吹き出しとして表示します。
+
+## Windows
+
+### Codex CLI
+
+`~/.codex/config.toml` に次を追加します。パスはこのリポジトリの実際の場所へ置き換えてください。
+
+```toml
+notify = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "D:\\hal\\BongoCat\\integrations\\bongocat-notify.ps1", "-Provider", "codex"]
+```
+
+Codex が末尾に追加する JSON 引数をスクリプトが BongoCat へ転送します。Codex CLI/TUI の `agent-turn-complete` に対応します。
+
+### Claude Code
+
+`~/.claude/settings.json` の `hooks` に次を追加します。既存の hooks がある場合は上書きせず、各配列へ要素を追加してください。
+
+```json
+{
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"D:\\hal\\BongoCat\\integrations\\bongocat-notify.ps1\" -Provider claude"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"D:\\hal\\BongoCat\\integrations\\bongocat-notify.ps1\" -Provider claude"
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"D:\\hal\\BongoCat\\integrations\\bongocat-notify.ps1\" -Provider claude"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+インストール先が自動検出されない場合は、環境変数 `BONGOCAT_PATH` に `BongoCat.exe` の絶対パスを設定します。
+
+## macOS
+
+最初に連携スクリプトへ実行権限を付けます。
+
+```sh
+chmod +x /path/to/BongoCat/integrations/bongocat-notify.sh
+```
+
+### Codex CLI
+
+`~/.codex/config.toml` に追加します。
+
+```toml
+notify = ["/bin/sh", "/path/to/BongoCat/integrations/bongocat-notify.sh", "codex"]
+```
+
+### Claude Code
+
+`~/.claude/settings.json` の `hooks` に追加します。
+
+```json
+{
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh /path/to/BongoCat/integrations/bongocat-notify.sh claude"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh /path/to/BongoCat/integrations/bongocat-notify.sh claude"
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh /path/to/BongoCat/integrations/bongocat-notify.sh claude"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+スクリプトは `/Applications/BongoCat.app` と `~/Applications/BongoCat.app` を自動検出します。別の場所へ置く場合は、環境変数 `BONGOCAT_PATH` に `.app/Contents/MacOS/` 内の実行ファイルを指定してください。
