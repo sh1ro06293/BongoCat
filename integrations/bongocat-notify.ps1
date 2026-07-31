@@ -17,7 +17,10 @@ if ([string]::IsNullOrWhiteSpace($payload)) {
 
 $candidates = @(@(
   $env:BONGOCAT_PATH,
+  (Join-Path $env:ProgramFiles 'BongoCat\bongo-cat.exe'),
+  (Join-Path $env:ProgramFiles 'BongoCat\BongoCat.exe'),
   (Join-Path $env:LOCALAPPDATA 'BongoCat\BongoCat.exe'),
+  (Join-Path $env:LOCALAPPDATA 'BongoCat\bongo-cat.exe'),
   (Join-Path $PSScriptRoot '..\src-tauri\target\release\bongo-cat.exe'),
   (Join-Path $PSScriptRoot '..\target\release\bongo-cat.exe'),
   (Join-Path $PSScriptRoot '..\src-tauri\target\debug\bongo-cat.exe'),

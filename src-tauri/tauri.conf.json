@@ -33,6 +33,23 @@
         "minWidth": 800,
         "minHeight": 600,
         "skipTaskbar": true
+      },
+      {
+        "label": "ai-notification",
+        "title": "BongoCat Notification",
+        "url": "index.html/#/ai-notification",
+        "width": 380,
+        "height": 124,
+        "visible": false,
+        "focus": false,
+        "shadow": false,
+        "alwaysOnTop": true,
+        "transparent": true,
+        "decorations": false,
+        "resizable": false,
+        "maximizable": false,
+        "minimizable": false,
+        "skipTaskbar": true
       }
     ],
     "security": {

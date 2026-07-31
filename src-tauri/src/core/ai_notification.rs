@@ -8,9 +8,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tauri::{AppHandle, Emitter, Manager};
-
-pub const EVENT_NAME: &str = "ai-notification";
+use tauri::{AppHandle, Manager};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -24,6 +22,14 @@ pub struct AiNotification {
 
 #[derive(Default)]
 pub struct PendingNotifications(pub Mutex<Vec<AiNotification>>);
+
+fn enqueue(app: &AppHandle, notification: AiNotification) {
+    if let Some(state) = app.try_state::<PendingNotifications>() {
+        if let Ok(mut pending) = state.0.lock() {
+            pending.push(notification);
+        }
+    }
+}
 
 fn text(value: &Value, keys: &[&str]) -> Option<String> {
     keys.iter()
@@ -110,20 +116,12 @@ fn notification_from_args(args: &[String]) -> Option<AiNotification> {
     notification_from_value(provider, &value)
 }
 
-pub fn receive(app: &AppHandle, args: &[String], queue: bool) -> bool {
+pub fn receive(app: &AppHandle, args: &[String], _queue: bool) -> bool {
     let Some(notification) = notification_from_args(args) else {
         return false;
     };
 
-    if queue {
-        if let Some(state) = app.try_state::<PendingNotifications>() {
-            if let Ok(mut pending) = state.0.lock() {
-                pending.push(notification);
-            }
-        }
-    } else {
-        let _ = app.emit_to("main", EVENT_NAME, &notification);
-    }
+    enqueue(app, notification);
 
     true
 }
@@ -227,7 +225,7 @@ fn handle_relay_connection(app: &AppHandle, mut stream: TcpStream) {
         return;
     };
 
-    let _ = app.emit_to("main", EVENT_NAME, notification);
+    enqueue(app, notification);
     relay_response(&mut stream, "204 No Content");
 }
 

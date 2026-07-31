@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api/core'
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { PhysicalPosition } from '@tauri-apps/api/dpi'
+import { getCurrentWebviewWindow, WebviewWindow } from '@tauri-apps/api/webviewWindow'
+import { monitorFromPoint } from '@tauri-apps/api/window'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
-import { useTauriListen } from '@/composables/useTauriListen'
-import { INVOKE_KEY, LISTEN_KEY } from '@/constants'
+import { INVOKE_KEY, WINDOW_LABEL } from '@/constants'
 
 interface AiNotification {
   provider: string
@@ -13,9 +15,11 @@ interface AiNotification {
   project?: string
 }
 
-const props = defineProps<{ mirrored?: boolean }>()
+const appWindow = getCurrentWebviewWindow()
 const current = ref<AiNotification>()
 let timer: ReturnType<typeof setTimeout> | undefined
+let pollTimer: ReturnType<typeof setInterval> | undefined
+let polling = false
 
 const providerLabel = computed(() => current.value?.provider === 'codex' ? 'Codex' : 'Claude Code')
 const icon = computed(() => {
@@ -24,18 +28,77 @@ const icon = computed(() => {
   return '✓'
 })
 
-function show(notification: AiNotification) {
-  current.value = notification
-  clearTimeout(timer)
-  timer = setTimeout(() => current.value = undefined, 8000)
+async function positionAboveCat() {
+  const mainWindow = await WebviewWindow.getByLabel(WINDOW_LABEL.MAIN)
+  if (!mainWindow) return
+
+  const [mainPosition, mainSize, bubbleSize] = await Promise.all([
+    mainWindow.outerPosition(),
+    mainWindow.outerSize(),
+    appWindow.outerSize(),
+  ])
+  const monitor = await monitorFromPoint(
+    mainPosition.x + mainSize.width / 2,
+    mainPosition.y + mainSize.height / 2,
+  )
+  const centeredX = Math.round(mainPosition.x + (mainSize.width - bubbleSize.width) / 2)
+  const aboveY = Math.round(mainPosition.y - bubbleSize.height + 18)
+
+  let x = centeredX
+  let y = aboveY
+
+  if (monitor) {
+    const { position, size } = monitor.workArea
+    const maxX = position.x + size.width - bubbleSize.width
+    const maxY = position.y + size.height - bubbleSize.height
+
+    x = Math.max(position.x, Math.min(centeredX, maxX))
+    y = aboveY >= position.y
+      ? Math.min(aboveY, maxY)
+      : Math.max(position.y, Math.min(mainPosition.y + mainSize.height - 18, maxY))
+  }
+
+  await appWindow.setPosition(new PhysicalPosition(x, y))
 }
 
-useTauriListen<AiNotification>(LISTEN_KEY.AI_NOTIFICATION, ({ payload }) => show(payload))
+async function show(notification: AiNotification) {
+  current.value = notification
+  clearTimeout(timer)
+  await positionAboveCat().catch(() => {})
+  await appWindow.show()
 
-invoke<AiNotification[]>(INVOKE_KEY.TAKE_PENDING_AI_NOTIFICATIONS)
-  .then(notifications => notifications.forEach(show))
+  timer = setTimeout(() => {
+    current.value = undefined
+    void appWindow.hide()
+  }, 8000)
+}
 
-onBeforeUnmount(() => clearTimeout(timer))
+function dismiss() {
+  current.value = undefined
+  void appWindow.hide()
+}
+
+async function takePending() {
+  if (polling) return
+  polling = true
+
+  try {
+    const notifications = await invoke<AiNotification[]>(INVOKE_KEY.TAKE_PENDING_AI_NOTIFICATIONS)
+    notifications.forEach(show)
+  } finally {
+    polling = false
+  }
+}
+
+onMounted(() => {
+  void takePending()
+  pollTimer = setInterval(takePending, 500)
+})
+
+onBeforeUnmount(() => {
+  clearTimeout(timer)
+  clearInterval(pollTimer)
+})
 </script>
 
 <template>
@@ -43,9 +106,9 @@ onBeforeUnmount(() => clearTimeout(timer))
     <button
       v-if="current"
       class="ai-notification"
-      :class="[`is-${current.status}`, { 'is-mirrored': props.mirrored }]"
+      :class="`is-${current.status}`"
       type="button"
-      @click="current = undefined"
+      @click="dismiss"
     >
       <span class="ai-notification__icon">{{ icon }}</span>
       <span class="min-w-0 flex-1">
@@ -64,26 +127,35 @@ onBeforeUnmount(() => clearTimeout(timer))
 .ai-notification {
   position: absolute;
   z-index: 20;
-  top: 4%;
+  bottom: 14px;
   left: 50%;
   display: flex;
-  width: min(88%, 360px);
-  max-height: 42%;
+  width: calc(100% - 12px);
+  max-height: calc(100% - 18px);
   transform: translateX(-50%);
-  gap: 10px;
-  overflow: hidden;
+  gap: 8px;
   border: 2px solid rgb(52 211 153 / 80%);
-  border-radius: 18px;
+  border-radius: 16px;
   background: rgb(17 24 39 / 92%);
-  padding: 12px 14px;
+  padding: 9px 12px;
   color: white;
+  font-size: 13px;
   text-align: left;
   box-shadow: 0 8px 30px rgb(0 0 0 / 35%);
   backdrop-filter: blur(8px);
 }
 
-.ai-notification.is-mirrored {
-  transform: translateX(-50%) scaleX(-1);
+.ai-notification::after {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  border-right: 2px solid rgb(52 211 153 / 80%);
+  border-bottom: 2px solid rgb(52 211 153 / 80%);
+  background: rgb(17 24 39 / 92%);
+  content: '';
+  transform: translateX(-50%) rotate(45deg);
 }
 
 .ai-notification.is-attention {
@@ -96,9 +168,9 @@ onBeforeUnmount(() => clearTimeout(timer))
 
 .ai-notification__icon {
   display: grid;
-  width: 28px;
-  height: 28px;
-  flex: 0 0 28px;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
   place-items: center;
   border-radius: 999px;
   background: rgb(52 211 153 / 24%);

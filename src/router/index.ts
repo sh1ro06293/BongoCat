@@ -2,6 +2,7 @@ import type { RouteRecordRaw } from 'vue-router'
 
 import { createRouter, createWebHashHistory } from 'vue-router'
 
+import AiNotification from '../components/ai-notification/index.vue'
 import Main from '../pages/main/index.vue'
 import Preference from '../pages/preference/index.vue'
 
@@ -13,6 +14,10 @@ const routes: Readonly<RouteRecordRaw[]> = [
   {
     path: '/preference',
     component: Preference,
+  },
+  {
+    path: '/ai-notification',
+    component: AiNotification,
   },
 ]
 
