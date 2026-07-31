@@ -151,3 +151,21 @@ printf '%s' '{"type":"agent-turn-complete","cwd":"/tmp/ssh-test"}' |
 ```
 
 SSHサーバー側でTCPフォワーディングが禁止されている場合は、サーバー管理者による `AllowTcpForwarding yes` の設定が必要です。
+
+### WindowsからSSH先を自動設定
+
+接続先が `ssh my-server` で利用できる場合、Windows側で次を一度実行します。
+
+```powershell
+& 'D:\hal\BongoCat\integrations\setup-ssh-relay.ps1' -HostAlias my-server
+```
+
+このスクリプトは次を行います。
+
+- Windowsの `~/.ssh/config` をバックアップ
+- 対象ホストだけに `RemoteForward` を追加
+- SSH先の `~/.local/bin` に通知スクリプトを配置
+- SSH先のCodex設定をバックアップして `notify` を追加
+- SSH先にClaude Code設定があれば、既存hooksを残して通知hooksを追加
+
+設定後は一度SSH接続を切り、通常どおり再接続してください。
