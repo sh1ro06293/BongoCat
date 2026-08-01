@@ -1,0 +1,43 @@
+version: '3'
+
+tasks:
+  default:
+    desc: 利用できるタスクを表示します
+    cmds:
+      - task --list
+    silent: true
+
+  mac:setup:
+    desc: Apple Silicon向けビルド環境を準備します
+    platforms: [darwin]
+    preconditions:
+      - sh: command -v pnpm
+        msg: pnpmをインストールしてください（brew install pnpm）
+      - sh: command -v rustup
+        msg: Rustをインストールしてください（https://rustup.rs）
+    cmds:
+      - rustup target add aarch64-apple-darwin
+      - pnpm install --frozen-lockfile
+
+  mac:dev:
+    desc: macOSでBongoCatを開発モード起動します
+    platforms: [darwin]
+    deps: [mac:setup]
+    cmd: pnpm tauri dev
+
+  mac:build:
+    desc: Apple Silicon向けの署名なしDMGを生成します
+    platforms: [darwin]
+    deps: [mac:setup]
+    cmd: >-
+      pnpm tauri build
+      --target aarch64-apple-darwin
+      --bundles dmg
+      --config src-tauri/tauri.macos-build.conf.json
+      --ci
+      --no-sign
+
+  mac:output:
+    desc: 生成したDMGの保存場所を表示します
+    platforms: [darwin]
+    cmd: find target/aarch64-apple-darwin/release/bundle/dmg -name '*.dmg' -print

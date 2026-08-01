@@ -1,0 +1,66 @@
+name: Build macOS (Apple Silicon)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - feat/ai-agent-notifications
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-arm64-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build unsigned DMG
+    runs-on: macos-15
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Cache Rust build
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: target
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Apple Silicon DMG
+        run: >-
+          pnpm tauri build
+          --target aarch64-apple-darwin
+          --bundles dmg
+          --config src-tauri/tauri.macos-build.conf.json
+          --ci
+          --no-sign
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@v5
+        with:
+          name: BongoCat-macOS-Apple-Silicon
+          path: target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
+          if-no-files-found: error
+          retention-days: 30
