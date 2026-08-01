@@ -21,6 +21,9 @@ export interface GeneralStore {
   update: {
     autoCheck: boolean
   }
+  integration: {
+    sshHostAlias: string
+  }
 }
 
 export const useGeneralStore = defineStore('general', () => {
@@ -59,6 +62,10 @@ export const useGeneralStore = defineStore('general', () => {
     autoCheck: false,
   })
 
+  const integration = reactive<GeneralStore['integration']>({
+    sshHostAlias: '',
+  })
+
   const getLanguage = async () => {
     const locale = await getLocale<Language>()
 
@@ -90,6 +97,7 @@ export const useGeneralStore = defineStore('general', () => {
     app,
     appearance,
     update,
+    integration,
     init,
   }
 })

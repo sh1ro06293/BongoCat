@@ -74,7 +74,8 @@ with hooks_path.open("w", encoding="utf-8") as file:
 PY
 fi
 
-if command -v python3 >/dev/null 2>&1 && [ -f "$HOME/.claude/settings.json" ]; then
+if command -v python3 >/dev/null 2>&1; then
+  mkdir -p "$HOME/.claude"
   python3 - "$HOME/.claude/settings.json" "$notifier" <<'PY'
 import json
 import pathlib
@@ -84,10 +85,12 @@ import sys
 settings_path = pathlib.Path(sys.argv[1])
 notifier = sys.argv[2]
 backup_path = settings_path.with_suffix(settings_path.suffix + ".bak")
-shutil.copy2(settings_path, backup_path)
-
-with settings_path.open(encoding="utf-8") as file:
-    settings = json.load(file)
+if settings_path.exists():
+    shutil.copy2(settings_path, backup_path)
+    with settings_path.open(encoding="utf-8") as file:
+        settings = json.load(file)
+else:
+    settings = {}
 
 command = f'/bin/sh "{notifier}" claude'
 hooks = settings.setdefault("hooks", {})

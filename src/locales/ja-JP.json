@@ -1,0 +1,212 @@
+{
+  "pages": {
+    "main": {
+      "hints": {
+        "redrawing": "再描画中…",
+        "switching": "切り替え中…"
+      }
+    },
+    "preference": {
+      "title": "設定",
+      "cat": {
+        "title": "猫",
+        "labels": {
+          "modelSettings": "モデル設定",
+          "mirrorMode": "左右反転",
+          "mouseMirror": "マウスの動きを反転",
+          "ignoreMouse": "マウス操作を無視",
+          "windowSettings": "ウィンドウ設定",
+          "passThrough": "クリックを透過",
+          "alwaysOnTop": "常に手前に表示",
+          "keepInScreen": "画面内に収める",
+          "windowSize": "ウィンドウサイズ",
+          "windowRadius": "角の丸み",
+          "opacity": "不透明度",
+          "motionSound": "モーション効果音",
+          "behavior": "モーションと表情",
+          "autoReleaseDelay": "キー自動解放までの時間",
+          "hideOnHover": "マウスを重ねたとき非表示",
+          "maxFPS": "最大フレームレート"
+        },
+        "hints": {
+          "mirrorMode": "有効にするとモデルを左右反転します。",
+          "mouseMirror": "有効にするとマウスに対応する手の動きを左右反転します。",
+          "ignoreMouse": "有効にするとマウス操作に反応しません。キーボードやゲームパッドだけを使う場合に便利です。",
+          "motionSound": "有効にすると、用意されているモーション効果音を再生します。",
+          "behavior": "有効にすると、モーションと表情を設定して再生できます。",
+          "passThrough": "有効にすると、猫のウィンドウをクリックしても背後のウィンドウへ操作が届きます。",
+          "alwaysOnTop": "有効にすると、猫をほかのウィンドウより手前に表示します。",
+          "keepInScreen": "有効にすると、猫が画面外へ出ないよう自動調整します。",
+          "windowSize": "ウィンドウの端をドラッグするか、Shiftを押しながら右ドラッグして変更します。",
+          "autoReleaseDelay": "Windowsで解放イベントを取得できない一部のキーを、指定時間後に自動解放します。",
+          "hideOnHover": "有効にすると、マウスを重ねたとき自動的に隠れます。0にするとすぐ隠れます。",
+          "maxFPS": "モデル描画の最大フレームレートです。低くするとCPU・GPU使用量を抑えられます。"
+        }
+      },
+      "general": {
+        "title": "一般",
+        "labels": {
+          "appSettings": "アプリ設定",
+          "launchOnStartup": "ログイン時に起動",
+          "showTaskbarIcon": "タスクバーに表示",
+          "showTrayIcon": "トレイアイコンを表示",
+          "appearanceSettings": "表示設定",
+          "themeMode": "テーマ",
+          "language": "言語",
+          "updateSettings": "アップデート設定",
+          "autoCheckUpdate": "アップデートを自動確認",
+          "permissionsSettings": "権限設定",
+          "integrationsSettings": "AIエージェント連携",
+          "sshRelay": "SSH通知リレー",
+          "inputMonitoringPermission": "入力監視の権限",
+          "administratorPermission": "管理者権限"
+        },
+        "options": {
+          "auto": "システム設定",
+          "lightMode": "ライト",
+          "darkMode": "ダーク"
+        },
+        "hints": {
+          "showTaskbarIcon": "有効にするとOBS Studioからウィンドウをキャプチャできます。",
+          "showTrayIcon": "有効にするとシステムトレイへアプリアイコンを表示します。",
+          "inputMonitoringPermission": "キーボードとマウスの操作を受け取るため、入力監視を許可します。",
+          "inputMonitoringPermissionGuide": "BongoCatがキーボードとマウスの操作を受け取るには、入力監視の権限が必要です。\n\n手順：\n1. システム設定 → プライバシーとセキュリティ → 入力監視を開きます。\n2. すでにBongoCatがある場合は選択し、「-」で一度削除します。\n3. 「+」を押してBongoCatを追加します。\n4. 権限を反映するためBongoCatを再起動します。",
+          "administratorPermission": "管理者として起動すると、一部のシステムキーや入力をより確実に取得できます。通常は不要です。",
+          "administratorPermissionGuide": "管理者権限で動くゲームなどの入力を取得できない場合だけ、管理者として起動してください。\n\n手順：\n1. BongoCatを終了します。\n2. エクスプローラーでexeまたはショートカットを探します。\n3. 右クリックして「管理者として実行」を選びます。",
+          "sshRelay": "SSH先のCodex・Claude Code通知を、このPCのBongoCatへ転送します。",
+          "sshRelayHost": "`ssh my-server` で接続できるホスト名を入力します。先にターミナルから一度接続してください。",
+          "sshRelayRequired": "SSHホスト名を入力してください。",
+          "sshRelaySuccess": "SSH通知リレーを設定しました。SSHへ再接続し、接続先のCodexまたはClaude Codeを再起動してください。"
+        },
+        "status": {
+          "authorized": "許可済み",
+          "adminEnabled": "有効",
+          "authorize": "許可する",
+          "viewGuide": "手順を見る"
+        },
+        "buttons": {
+          "openNow": "今すぐ開く",
+          "openLater": "あとで開く",
+          "setLater": "あとで設定",
+          "exitApp": "アプリを終了",
+          "setupRelay": "設定する"
+        },
+        "placeholders": {
+          "sshHostAlias": "my-server"
+        }
+      },
+      "model": {
+        "title": "モデル",
+        "labels": {
+          "deleteModel": "モデルを削除"
+        },
+        "hints": {
+          "deleteSuccess": "削除しました",
+          "deleteModel": "このモデルを削除しますか？",
+          "importSuccess": "インポートしました",
+          "clickOrDragToImport": "クリックまたはドラッグしてインポート"
+        },
+        "tooltips": {
+          "createModel": "モデルを作成",
+          "convertModel": "モデルを変換",
+          "moreModels": "ほかのモデル"
+        },
+        "behaviorModal": {
+          "title": "モーションと表情",
+          "labels": {
+            "motion": "モーション",
+            "expression": "表情",
+            "motionIndex": "モーション {index}",
+            "motionGroupIndex": "モーショングループ {index}",
+            "expressionIndex": "表情 {index}"
+          }
+        }
+      },
+      "shortcut": {
+        "title": "ショートカット",
+        "labels": {
+          "toggleCat": "猫の表示切り替え",
+          "togglePreferences": "設定画面の表示切り替え",
+          "mirrorMode": "左右反転",
+          "passThrough": "クリック透過",
+          "alwaysOnTop": "常に手前に表示"
+        },
+        "hints": {
+          "toggleCat": "猫の表示と非表示を切り替えます。",
+          "togglePreferences": "設定画面の表示と非表示を切り替えます。",
+          "mirrorMode": "猫の左右反転を切り替えます。",
+          "passThrough": "猫のウィンドウのクリック透過を切り替えます。",
+          "alwaysOnTop": "猫を常に手前へ表示するか切り替えます。"
+        }
+      },
+      "about": {
+        "title": "情報",
+        "labels": {
+          "aboutApp": "アプリについて",
+          "appLog": "アプリログ",
+          "appInfo": "アプリ情報",
+          "openSource": "ソースコード"
+        },
+        "hints": {
+          "appInfo": "不具合報告に添付するアプリ情報をコピーします。",
+          "copySuccess": "コピーしました"
+        },
+        "buttons": {
+          "checkUpdate": "アップデートを確認",
+          "copy": "コピー",
+          "feedbackIssues": "不具合を報告",
+          "viewLog": "ログを表示"
+        }
+      }
+    }
+  },
+  "components": {
+    "shortcut": {
+      "hints": {
+        "pressRecordShortcut": "キーを押してショートカットを登録",
+        "clickRecordShortcut": "クリックしてショートカットを登録"
+      }
+    },
+    "updateApp": {
+      "title": "新しいバージョンがあります 🥳",
+      "labels": {
+        "updateVersion": "バージョン：",
+        "updateTime": "更新日時：",
+        "changelog": "変更内容："
+      },
+      "hints": {
+        "checkingUpdates": "アップデートを確認中…",
+        "alreadyLatest": "最新バージョンです 🎉"
+      },
+      "buttons": {
+        "updateNow": "今すぐ更新",
+        "updateLater": "あとで更新"
+      }
+    }
+  },
+  "composables": {
+    "useAppMenu": {
+      "labels": {
+        "preference": "設定…",
+        "hideCat": "猫を隠す",
+        "showCat": "猫を表示",
+        "passThrough": "クリックを透過",
+        "windowSize": "ウィンドウサイズ",
+        "opacity": "不透明度",
+        "restartApp": "アプリを再起動",
+        "quitApp": "アプリを終了"
+      }
+    },
+    "useTray": {
+      "checkUpdate": "アップデートを確認",
+      "openSource": "ソースコード"
+    }
+  },
+  "utils": {
+    "live2d": {
+      "hints": {
+        "notFound": "モデルのメイン設定ファイルが見つかりません。モデルファイルが揃っているか確認してください。"
+      }
+    }
+  }
+}

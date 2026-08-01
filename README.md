@@ -49,6 +49,8 @@
 
 不确定下载哪一个？请查阅[下载指南](.github/DOWNLOAD_GUIDE.md)。
 
+このフォークのWindows・Apple Silicon Mac向け導入方法とClaude Code / Codex通知設定は、[日本語セットアップガイド](SETUP.ja.md)を参照してください。
+
 ## 功能介绍
 
 - 适配 macOS、Windows 和 Linux(x11)。

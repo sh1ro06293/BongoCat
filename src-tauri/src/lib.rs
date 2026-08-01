@@ -8,6 +8,7 @@ use core::{
     device::start_device_listening,
     gamepad::{start_gamepad_listing, stop_gamepad_listing},
     prevent_default, setup,
+    ssh_relay_setup::setup_ssh_relay,
 };
 use tauri::{Manager, WindowEvent, generate_handler};
 use tauri_plugin_autostart::MacosLauncher;
@@ -34,7 +35,8 @@ pub fn run() {
             take_pending_ai_notifications,
             start_device_listening,
             start_gamepad_listing,
-            stop_gamepad_listing
+            stop_gamepad_listing,
+            setup_ssh_relay
         ])
         .plugin(tauri_plugin_admin_status::init())
         .plugin(tauri_plugin_custom_window::init())

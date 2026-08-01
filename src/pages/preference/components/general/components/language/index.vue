@@ -13,6 +13,7 @@ const options: Array<{ label: string, value: Language }> = [
   { label: '简体中文', value: LANGUAGE.ZH_CN },
   { label: '繁體中文', value: LANGUAGE.ZH_TW },
   { label: 'English', value: LANGUAGE.EN_US },
+  { label: '日本語', value: LANGUAGE.JA_JP },
   { label: 'Tiếng Việt', value: LANGUAGE.VI_VN },
   { label: 'Português', value: LANGUAGE.PT_BR },
 ]

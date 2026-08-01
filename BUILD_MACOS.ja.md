@@ -2,6 +2,8 @@
 
 M1・M2・M3・M4など、Apple Silicon搭載Mac向けのDMGを生成します。Intel Mac版は生成しません。
 
+DMGのインストール、初回起動、入力監視、Claude Code / Codex通知の設定は [SETUP.ja.md](SETUP.ja.md) を参照してください。
+
 ## GitHubで生成する
 
 `feat/ai-agent-notifications` ブランチへpushすると、GitHub Actionsの `Build macOS (Apple Silicon)` が自動実行されます。

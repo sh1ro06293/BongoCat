@@ -10,6 +10,7 @@ import { isMac, isWindows } from '@/utils/platform'
 
 import Language from './components/language/index.vue'
 import MacosPermissions from './components/macos-permissions/index.vue'
+import SshRelay from './components/ssh-relay/index.vue'
 import ThemeMode from './components/theme-mode/index.vue'
 import WindowsPermissions from './components/windows-permissions/index.vue'
 
@@ -64,4 +65,6 @@ watch(() => generalStore.app.autostart, async (value) => {
       <Switch v-model:checked="generalStore.update.autoCheck" />
     </ProListItem>
   </ProList>
+
+  <SshRelay v-if="isMac || isWindows" />
 </template>
