@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Button, Input, message, SpaceCompact } from 'antdv-next'
+import { Button, Flex, Input, InputPassword, message } from 'antdv-next'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -10,6 +10,7 @@ import { useGeneralStore } from '@/stores/general'
 
 const generalStore = useGeneralStore()
 const loading = ref(false)
+const password = ref('')
 const { t } = useI18n()
 
 async function handleSetup() {
@@ -23,11 +24,12 @@ async function handleSetup() {
   loading.value = true
 
   try {
-    await setupSshRelay(hostAlias)
+    await setupSshRelay(hostAlias, password.value)
     message.success(t('pages.preference.general.hints.sshRelaySuccess'), 8)
   } catch (error) {
     message.error(String(error), 10)
   } finally {
+    password.value = ''
     loading.value = false
   }
 }
@@ -40,20 +42,31 @@ async function handleSetup() {
       :title="$t('pages.preference.general.labels.sshRelay')"
       vertical
     >
-      <SpaceCompact class="w-full">
+      <Flex
+        class="w-full"
+        gap="small"
+        vertical
+      >
         <Input
           v-model:value="generalStore.integration.sshHostAlias"
           :placeholder="$t('pages.preference.general.placeholders.sshHostAlias')"
           @press-enter="handleSetup"
         />
+        <InputPassword
+          v-model:value="password"
+          autocomplete="new-password"
+          :placeholder="$t('pages.preference.general.placeholders.sshPassword')"
+          @press-enter="handleSetup"
+        />
         <Button
+          block
           :loading="loading"
           type="primary"
           @click="handleSetup"
         >
           {{ $t('pages.preference.general.buttons.setupRelay') }}
         </Button>
-      </SpaceCompact>
+      </Flex>
 
       <template #description>
         <div>{{ $t('pages.preference.general.hints.sshRelay') }}</div>

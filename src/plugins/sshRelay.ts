@@ -5,6 +5,9 @@ export interface SshRelaySetupResult {
   backupPath?: string
 }
 
-export function setupSshRelay(hostAlias: string) {
-  return invoke<SshRelaySetupResult>('setup_ssh_relay', { hostAlias })
+export function setupSshRelay(hostAlias: string, password?: string) {
+  return invoke<SshRelaySetupResult>('setup_ssh_relay', {
+    hostAlias,
+    password: password || null,
+  })
 }

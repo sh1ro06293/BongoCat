@@ -9,6 +9,7 @@ import { useAppStore } from '@/stores/app'
 import { useCatStore } from '@/stores/cat'
 import { useModelStore } from '@/stores/model'
 import { inBetween } from '@/utils/is'
+import live2d from '@/utils/live2d'
 import { isMac, isWindows } from '@/utils/platform'
 
 import { INVOKE_KEY, LISTEN_KEY, WINDOW_LABEL } from '../constants'
@@ -105,6 +106,7 @@ export function useDevice() {
     let nextKey = key
 
     const unsupportedKey = !modelStore.supportKeys[nextKey]
+      && !live2d.hasVTubeStudioInput('keyboard', nextKey)
 
     if (key.startsWith('F') && unsupportedKey) {
       nextKey = key.replace(/F(\d+)/, 'Fn')

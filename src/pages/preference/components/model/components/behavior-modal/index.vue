@@ -8,20 +8,13 @@ import { ref } from 'vue'
 
 import { LISTEN_KEY } from '@/constants'
 import { useModelStore } from '@/stores/model'
+import { getExpressionShortcutId, getMotionShortcutId } from '@/utils/modelBehavior'
 
 import BehaviorItem from './components/behavior-item/index.vue'
 
 const modelValue = defineModel<boolean>()
 const modelStore = useModelStore()
 const value = ref<'motion' | 'expression'>('motion')
-
-function getMotionShortcutId(groupName: string, index: number) {
-  return `${modelStore.currentModel?.id}:motion:${groupName}:${index}`
-}
-
-function getExpressionShortcutId(index: number) {
-  return `${modelStore.currentModel?.id}:expression:${index}`
-}
 
 function startMotion(motion: MotionInfo) {
   emit(LISTEN_KEY.START_MOTION, motion)
@@ -75,8 +68,8 @@ function setExpression(index: number) {
               :key="item.no"
             >
               <BehaviorItem
-                v-model="modelStore.shortcuts[getMotionShortcutId(groupName, index)]"
-                :label="$t('pages.preference.model.behaviorModal.labels.motionIndex', { index: index + 1 })"
+                v-model="modelStore.shortcuts[getMotionShortcutId(modelStore.currentModel!.id, groupName, index)]"
+                :label="item.displayName || $t('pages.preference.model.behaviorModal.labels.motionIndex', { index: index + 1 })"
                 @click="startMotion(item)"
               />
             </template>
@@ -100,8 +93,8 @@ function setExpression(index: number) {
           :key="item.name"
         >
           <BehaviorItem
-            v-model="modelStore.shortcuts[getExpressionShortcutId(index)]"
-            :label="$t('pages.preference.model.behaviorModal.labels.expressionIndex', { index: index + 1 })"
+            v-model="modelStore.shortcuts[getExpressionShortcutId(modelStore.currentModel!.id, index)]"
+            :label="item.name || $t('pages.preference.model.behaviorModal.labels.expressionIndex', { index: index + 1 })"
             @click="setExpression(index)"
           />
         </template>

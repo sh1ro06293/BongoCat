@@ -2,15 +2,10 @@
 import { Button, Divider } from 'antdv-next'
 
 import Shortcut from '@/components/shortcut/index.vue'
-import { useKeyPress } from '@/composables/useKeyPress'
 
 const { label } = defineProps<{ label: string }>()
 const emit = defineEmits(['click'])
 const modelValue = defineModel<string>()
-
-useKeyPress(modelValue, () => {
-  emit('click')
-})
 </script>
 
 <template>

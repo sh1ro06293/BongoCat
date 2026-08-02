@@ -17,6 +17,7 @@ import { useAppShortcuts } from '@/composables/useAppShortcuts'
 import { useDevice } from '@/composables/useDevice'
 import { useGamepad } from '@/composables/useGamepad'
 import { useModel } from '@/composables/useModel'
+import { useModelBehaviorShortcuts } from '@/composables/useModelBehaviorShortcuts'
 import { useTauriListen } from '@/composables/useTauriListen'
 import { LISTEN_KEY } from '@/constants'
 import { hideWindow, setAlwaysOnTop, setTaskbarVisibility, showWindow } from '@/plugins/window'
@@ -41,6 +42,7 @@ const backgroundImagePath = ref<string>()
 const { stickActive } = useGamepad()
 
 useAppShortcuts()
+useModelBehaviorShortcuts()
 
 onMounted(startListening)
 

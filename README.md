@@ -51,6 +51,8 @@
 
 このフォークのWindows・Apple Silicon Mac向け導入方法とClaude Code / Codex通知設定は、[日本語セットアップガイド](SETUP.ja.md)を参照してください。
 
+このフォークはVTube Studioモデルの `.vtube.json` から表情・モーション・グローバルホットキー・キー吹き出しを自動読込します。Windowsの `Alt` はMacでは `Option（⌥）` として動作します。詳しくは[日本語セットアップガイドのVTube Studioモデル項目](SETUP.ja.md#vtube-studioモデルのホットキー)を参照してください。
+
 ## 功能介绍
 
 - 适配 macOS、Windows 和 Linux(x11)。

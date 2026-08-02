@@ -13,6 +13,18 @@ dist-ssr
 *.local
 target
 
+# Imported/private Live2D models
+custom-models/
+private-models/
+*.vtube.json
+*.moc3
+*.model3.json
+*.exp3.json
+*.motion3.json
+*.physics3.json
+*.pose3.json
+*.cdi3.json
+
 # Editor directories and files
 .idea
 .DS_Store

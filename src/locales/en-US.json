@@ -74,8 +74,8 @@
           "administratorPermission": "Running the app as administrator helps capture some system-level keys and input events more reliably.",
           "administratorPermissionGuide": "To capture some system-level keys and input events more reliably, it is recommended to run the app as administrator.\n\nHow to do it:\n1. Exit the app first.\n2. Find the app exe or its shortcut in File Explorer.\n3. Choose how to launch:\n   • One-time: Right-click and choose \"Run as administrator\".\n   • Always (default): Right-click → Properties → Compatibility tab → check \"Run this program as an administrator\" → OK.",
           "sshRelay": "Forward Codex and Claude Code notifications from an SSH host to this BongoCat.",
-          "sshRelayHost": "Enter an alias that works with `ssh my-server`. Connect to it once in a terminal before setup.",
-          "sshRelayRequired": "Enter an SSH host alias.",
+          "sshRelayHost": "Enter user{'@'}host and the SSH password for the first setup. BongoCat creates and registers a dedicated key; the password is not saved. Leave the password blank when running setup again.",
+          "sshRelayRequired": "Enter an SSH target.",
           "sshRelaySuccess": "SSH notification relay setup is complete. Reconnect SSH and restart Codex or Claude Code on the remote host."
         },
         "status": {
@@ -92,7 +92,8 @@
           "setupRelay": "Set Up"
         },
         "placeholders": {
-          "sshHostAlias": "my-server"
+          "sshHostAlias": "user{'@'}host.example",
+          "sshPassword": "SSH password (first setup only)"
         }
       },
       "model": {

@@ -17,13 +17,17 @@ export interface Model {
   isPreset: boolean
 }
 
+export interface ModelMotionInfo extends MotionInfo {
+  displayName?: string
+}
+
 export const useModelStore = defineStore('model', () => {
   const modelReady = ref(true)
   const models = ref<Model[]>([])
   const currentModel = ref<Model>()
   const supportKeys = reactive<Record<string, string>>({})
   const pressedKeys = reactive<Record<string, string>>({})
-  const currentMotions = ref<Array<[string, MotionInfo[]]>>([])
+  const currentMotions = ref<Array<[string, ModelMotionInfo[]]>>([])
   const currentExpressions = ref<ExpressionInfo[]>([])
   const shortcuts = reactive<Record<string, string>>({})
 

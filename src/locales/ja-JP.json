@@ -74,8 +74,8 @@
           "administratorPermission": "管理者として起動すると、一部のシステムキーや入力をより確実に取得できます。通常は不要です。",
           "administratorPermissionGuide": "管理者権限で動くゲームなどの入力を取得できない場合だけ、管理者として起動してください。\n\n手順：\n1. BongoCatを終了します。\n2. エクスプローラーでexeまたはショートカットを探します。\n3. 右クリックして「管理者として実行」を選びます。",
           "sshRelay": "SSH先のCodex・Claude Code通知を、このPCのBongoCatへ転送します。",
-          "sshRelayHost": "`ssh my-server` で接続できるホスト名を入力します。先にターミナルから一度接続してください。",
-          "sshRelayRequired": "SSHホスト名を入力してください。",
+          "sshRelayHost": "初回は user{'@'}host とSSHパスワードを入力してください。BongoCat専用の鍵を作成・登録し、パスワードは保存しません。2回目以降はパスワードを空欄にできます。",
+          "sshRelayRequired": "SSH接続先を入力してください。",
           "sshRelaySuccess": "SSH通知リレーを設定しました。SSHへ再接続し、接続先のCodexまたはClaude Codeを再起動してください。"
         },
         "status": {
@@ -92,7 +92,8 @@
           "setupRelay": "設定する"
         },
         "placeholders": {
-          "sshHostAlias": "my-server"
+          "sshHostAlias": "user{'@'}host.example",
+          "sshPassword": "SSHパスワード（初回設定のみ）"
         }
       },
       "model": {

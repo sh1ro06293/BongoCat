@@ -10,6 +10,7 @@ import { ref } from 'vue'
 
 import { useCatStore } from '@/stores/cat'
 import { useModelStore } from '@/stores/model'
+import { getExpressionShortcutId, getMotionShortcutId } from '@/utils/modelBehavior'
 import { getCursorMonitor } from '@/utils/monitor'
 import { isMac } from '@/utils/platform'
 
@@ -57,14 +58,6 @@ export function useModel() {
     return ''
   }
 
-  function getMotionShortcutId(modelId: string, groupName: string, index: number) {
-    return `${modelId}:motion:${groupName}:${index}`
-  }
-
-  function getExpressionShortcutId(modelId: string, index: number) {
-    return `${modelId}:expression:${index}`
-  }
-
   async function handleLoad() {
     try {
       if (!modelStore.currentModel) return
@@ -73,7 +66,7 @@ export function useModel() {
 
       await resolveResource(path)
 
-      const { width, height, motions, expressions } = await live2d.load(path)
+      const { width, height, motions, expressions, vtubeBehaviors } = await live2d.load(path)
 
       const nextMotions = Object.entries(motions)
 
@@ -87,6 +80,19 @@ export function useModel() {
 
       const behaviorIds: string[] = []
 
+      for (const behavior of vtubeBehaviors) {
+        const id = behavior.kind === 'motion'
+          ? getMotionShortcutId(modelId, behavior.group, behavior.index)
+          : getExpressionShortcutId(
+              modelId,
+              expressions.findIndex(expression => expression.name === behavior.expressionName),
+            )
+
+        if (id.endsWith(':-1') || modelStore.shortcuts[id]) continue
+
+        modelStore.shortcuts[id] = behavior.shortcut
+      }
+
       for (const [groupName, items] of nextMotions) {
         for (const [index] of items.entries()) {
           behaviorIds.push(getMotionShortcutId(modelId, groupName, index))
@@ -95,6 +101,14 @@ export function useModel() {
 
       for (const [index] of expressions.entries()) {
         behaviorIds.push(getExpressionShortcutId(modelId, index))
+      }
+
+      const currentBehaviorIds = new Set(behaviorIds)
+
+      for (const id of Object.keys(modelStore.shortcuts)) {
+        if (!id.startsWith(`${modelId}:`) || currentBehaviorIds.has(id)) continue
+
+        delete modelStore.shortcuts[id]
       }
 
       for (const [index, id] of behaviorIds.entries()) {
@@ -137,6 +151,8 @@ export function useModel() {
   }
 
   const handlePress = (key: string) => {
+    live2d.setVTubeStudioInput('keyboard', key, true)
+
     const path = modelStore.supportKeys[key]
 
     if (!path) return
@@ -154,6 +170,8 @@ export function useModel() {
   }
 
   const handleRelease = (key: string) => {
+    live2d.setVTubeStudioInput('keyboard', key, false)
+
     delete modelStore.pressedKeys[key]
   }
 
@@ -164,6 +182,8 @@ export function useModel() {
   }
 
   function handleMouseChange(key: string, pressed = true) {
+    live2d.setVTubeStudioInput('mouse', key, pressed)
+
     const id = key === 'Left' ? 'ParamMouseLeftDown' : 'ParamMouseRightDown'
 
     live2d.setParameterValue(id, pressed)
