@@ -4,7 +4,7 @@ import { Divider, Flex, InputNumber, Slider, SpaceAddon, SpaceCompact, Switch } 
 import ProListItem from '@/components/pro-list-item/index.vue'
 import ProList from '@/components/pro-list/index.vue'
 import { useCatStore } from '@/stores/cat'
-import { isWindows } from '@/utils/platform'
+import { isMac, isWindows } from '@/utils/platform'
 
 const catStore = useCatStore()
 </script>
@@ -47,7 +47,7 @@ const catStore = useCatStore()
     </ProListItem>
 
     <ProListItem
-      v-if="isWindows"
+      v-if="isWindows || isMac"
       :description="$t('pages.preference.cat.hints.autoReleaseDelay')"
       :title="$t('pages.preference.cat.labels.autoReleaseDelay')"
     >

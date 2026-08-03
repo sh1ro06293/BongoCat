@@ -88,6 +88,13 @@ export function useDevice() {
 
   onUnmounted(() => {
     Ticker.shared.remove(tickerCallback)
+
+    for (const [key, timer] of releaseTimers) {
+      clearTimeout(timer)
+      handleRelease(key)
+    }
+
+    releaseTimers.clear()
   })
 
   watch(() => catStore.model.ignoreMouse, (value) => {
@@ -185,6 +192,17 @@ export function useDevice() {
     releaseTimers.set(key, timer)
   }
 
+  const handleReleaseWithTimerCleanup = (key: string) => {
+    const timer = releaseTimers.get(key)
+
+    if (timer) {
+      clearTimeout(timer)
+      releaseTimers.delete(key)
+    }
+
+    handleRelease(key)
+  }
+
   useTauriListen<DeviceEvent>(LISTEN_KEY.DEVICE_CHANGED, ({ payload }) => {
     const { kind, value } = payload
 
@@ -198,7 +216,7 @@ export function useDevice() {
       }
 
       if (kind === 'KeyboardPress') {
-        if (isWindows) {
+        if (isWindows || isMac) {
           const delay = catStore.model.autoReleaseDelay * 1000
 
           return handleAutoRelease(nextValue, delay)
@@ -207,7 +225,7 @@ export function useDevice() {
         return handlePress(nextValue)
       }
 
-      return handleRelease(nextValue)
+      return handleReleaseWithTimerCleanup(nextValue)
     }
 
     switch (kind) {
