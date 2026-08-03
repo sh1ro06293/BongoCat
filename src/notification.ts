@@ -109,14 +109,15 @@ async function positionAboveCat() {
   await appWindow.setPosition(new PhysicalPosition(x, y))
 }
 
-async function destroyIfIdle() {
+async function hideIfIdle() {
   const notifications = await takePending()
   if (notifications.length > 0) {
     await showNotification(notifications.at(-1)!)
     return
   }
 
-  await appWindow.destroy()
+  notificationElement.hidden = true
+  await appWindow.hide()
 }
 
 async function showNotification(notification: AiNotification) {
@@ -133,11 +134,11 @@ async function showNotification(notification: AiNotification) {
   notificationElement.classList.add('is-measuring')
 
   clearTimeout(closeTimer)
-  await resizeToContent().catch(() => {})
-  notificationElement.classList.remove('is-measuring')
-  await positionAboveCat().catch(() => {})
   await appWindow.show()
-  closeTimer = setTimeout(() => void destroyIfIdle(), 8000)
+  await resizeToContent().catch(() => {})
+  await positionAboveCat().catch(() => {})
+  notificationElement.classList.remove('is-measuring')
+  closeTimer = setTimeout(() => void hideIfIdle(), 8000)
 }
 
 async function takePending() {
@@ -159,7 +160,11 @@ async function poll() {
   }
 }
 
-notificationElement.addEventListener('click', () => void appWindow.destroy())
+notificationElement.addEventListener('click', () => {
+  clearTimeout(closeTimer)
+  notificationElement.hidden = true
+  void appWindow.hide()
+})
 window.addEventListener('beforeunload', () => clearTimeout(closeTimer))
 
 void poll()

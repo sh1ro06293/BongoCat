@@ -46,6 +46,7 @@ button {
 
 .notification.is-measuring {
   max-height: none;
+  visibility: hidden;
 }
 
 .notification::after {
