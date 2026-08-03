@@ -2,7 +2,8 @@
 use crate::MAIN_WINDOW_LABEL;
 use tauri::{AppHandle, Runtime, WebviewWindow, command};
 use tauri_nspanel::{
-    CollectionBehavior, ManagerExt, PanelLevel, objc2_app_kit::NSWindowCollectionBehavior,
+    CollectionBehavior, ManagerExt, PanelLevel,
+    objc2_app_kit::{NSWindow, NSWindowCollectionBehavior},
 };
 
 pub fn visible_main_panel_collection_behavior() -> NSWindowCollectionBehavior {
@@ -12,6 +13,15 @@ pub fn visible_main_panel_collection_behavior() -> NSWindowCollectionBehavior {
         .full_screen_auxiliary()
         .value()
         | NSWindowCollectionBehavior::CanJoinAllApplications
+}
+
+pub fn configure_overlay_window_collection_behavior<R: Runtime>(window: &WebviewWindow<R>) {
+    let Ok(ns_window) = window.ns_window() else {
+        return;
+    };
+    let ns_window = unsafe { &*ns_window.cast::<NSWindow>() };
+
+    ns_window.setCollectionBehavior(visible_main_panel_collection_behavior());
 }
 
 enum MacOSPanelStatus {

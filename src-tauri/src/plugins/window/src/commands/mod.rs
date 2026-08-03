@@ -90,7 +90,7 @@ pub fn ensure_ai_notification_window<R: Runtime>(app_handle: &AppHandle<R>) {
             return;
         }
 
-        let _ = WebviewWindowBuilder::new(
+        let builder = WebviewWindowBuilder::new(
             &app_handle_clone,
             AI_NOTIFICATION_WINDOW_LABEL,
             WebviewUrl::App("notification.html".into()),
@@ -106,8 +106,12 @@ pub fn ensure_ai_notification_window<R: Runtime>(app_handle: &AppHandle<R>) {
         .resizable(false)
         .maximizable(false)
         .minimizable(false)
-        .skip_taskbar(true)
-        .build();
+        .skip_taskbar(true);
+
+        if let Ok(window) = builder.build() {
+            #[cfg(target_os = "macos")]
+            configure_overlay_window_collection_behavior(&window);
+        }
     });
 }
 
