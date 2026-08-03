@@ -1,7 +1,7 @@
 #![allow(deprecated)]
 use tauri::{AppHandle, Emitter, EventTarget, Manager, WebviewWindow};
-use tauri_nspanel::{CollectionBehavior, PanelLevel, StyleMask, WebviewWindowExt, tauri_panel};
-use tauri_plugin_custom_window::MAIN_WINDOW_LABEL;
+use tauri_nspanel::{PanelLevel, StyleMask, WebviewWindowExt, tauri_panel};
+use tauri_plugin_custom_window::{MAIN_WINDOW_LABEL, visible_main_panel_collection_behavior};
 
 const WINDOW_FOCUS_EVENT: &str = "tauri://focus";
 const WINDOW_BLUR_EVENT: &str = "tauri://blur";
@@ -36,13 +36,7 @@ pub fn platform(app_handle: &AppHandle, main_window: WebviewWindow) {
 
     panel.set_style_mask(StyleMask::empty().resizable().nonactivating_panel().into());
 
-    panel.set_collection_behavior(
-        CollectionBehavior::new()
-            .stationary()
-            .move_to_active_space()
-            .full_screen_auxiliary()
-            .into(),
-    );
+    panel.set_collection_behavior(visible_main_panel_collection_behavior());
 
     let handler = NsPanelEventHandler::new();
 

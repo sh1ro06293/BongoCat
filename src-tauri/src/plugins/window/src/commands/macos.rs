@@ -1,7 +1,18 @@
 #![allow(deprecated)]
 use crate::MAIN_WINDOW_LABEL;
 use tauri::{AppHandle, Runtime, WebviewWindow, command};
-use tauri_nspanel::{CollectionBehavior, ManagerExt, PanelLevel};
+use tauri_nspanel::{
+    CollectionBehavior, ManagerExt, PanelLevel, objc2_app_kit::NSWindowCollectionBehavior,
+};
+
+pub fn visible_main_panel_collection_behavior() -> NSWindowCollectionBehavior {
+    CollectionBehavior::new()
+        .stationary()
+        .can_join_all_spaces()
+        .full_screen_auxiliary()
+        .value()
+        | NSWindowCollectionBehavior::CanJoinAllApplications
+}
 
 enum MacOSPanelStatus {
     Show,
@@ -25,15 +36,8 @@ fn set_macos_panel<R: Runtime>(
             if let Ok(panel) = app_handle_clone.get_webview_panel(MAIN_WINDOW_LABEL) {
                 match status {
                     MacOSPanelStatus::Show => {
+                        panel.set_collection_behavior(visible_main_panel_collection_behavior());
                         panel.show();
-
-                        panel.set_collection_behavior(
-                            CollectionBehavior::new()
-                                .stationary()
-                                .can_join_all_spaces()
-                                .full_screen_auxiliary()
-                                .into(),
-                        );
                     }
                     MacOSPanelStatus::Hide => {
                         panel.hide();
@@ -105,4 +109,20 @@ pub async fn set_always_on_top<R: Runtime>(
 #[command]
 pub async fn set_taskbar_visibility<R: Runtime>(app_handle: AppHandle<R>, visible: bool) {
     let _ = app_handle.set_dock_visibility(visible);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn visible_main_panel_joins_desktop_and_full_screen_spaces() {
+        let behavior = visible_main_panel_collection_behavior();
+
+        assert!(behavior.contains(NSWindowCollectionBehavior::CanJoinAllSpaces));
+        assert!(behavior.contains(NSWindowCollectionBehavior::FullScreenAuxiliary));
+        assert!(behavior.contains(NSWindowCollectionBehavior::CanJoinAllApplications));
+        assert!(behavior.contains(NSWindowCollectionBehavior::Stationary));
+        assert!(!behavior.contains(NSWindowCollectionBehavior::MoveToActiveSpace));
+    }
 }
