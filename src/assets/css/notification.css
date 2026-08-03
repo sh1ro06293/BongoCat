@@ -44,6 +44,10 @@ button {
   backdrop-filter: blur(8px);
 }
 
+.notification.is-measuring {
+  max-height: none;
+}
+
 .notification::after {
   position: absolute;
   bottom: -10px;
@@ -93,6 +97,7 @@ button {
 
 .notification__content {
   flex: 1;
+  overflow: hidden;
 }
 
 .notification__header {
@@ -116,6 +121,8 @@ button {
   display: -webkit-box;
   overflow: hidden;
   color: rgb(229 231 235);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 4;
 }

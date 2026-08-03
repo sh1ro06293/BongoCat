@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
-import { PhysicalPosition } from '@tauri-apps/api/dpi'
+import { LogicalSize, PhysicalPosition } from '@tauri-apps/api/dpi'
 import { getCurrentWebviewWindow, WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { monitorFromPoint } from '@tauri-apps/api/window'
 
@@ -26,19 +26,69 @@ const messageElement = document.querySelector<HTMLElement>('#message')!
 let closeTimer: ReturnType<typeof setTimeout> | undefined
 let polling = false
 
-async function positionAboveCat() {
-  const mainWindow = await WebviewWindow.getByLabel(WINDOW_LABEL.MAIN)
-  if (!mainWindow) return
+const DEFAULT_BUBBLE_WIDTH = 380
+const MIN_BUBBLE_HEIGHT = 124
+const MAX_BUBBLE_HEIGHT = 196
+const SCREEN_MARGIN = 8
+const BUBBLE_VERTICAL_SPACE = 28
 
-  const [mainPosition, mainSize, bubbleSize] = await Promise.all([
+async function getCatWindowLayout() {
+  const mainWindow = await WebviewWindow.getByLabel(WINDOW_LABEL.MAIN)
+  if (!mainWindow) return null
+
+  const [mainPosition, mainSize, scaleFactor] = await Promise.all([
     mainWindow.outerPosition(),
     mainWindow.outerSize(),
-    appWindow.outerSize(),
+    mainWindow.scaleFactor(),
   ])
-  const monitor = await monitorFromPoint(
+  const center = new PhysicalPosition(
     mainPosition.x + mainSize.width / 2,
     mainPosition.y + mainSize.height / 2,
+  ).toLogical(scaleFactor)
+  const monitor = await monitorFromPoint(
+    center.x,
+    center.y,
   )
+
+  return { mainPosition, mainSize, monitor }
+}
+
+function nextAnimationFrame() {
+  return new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+}
+
+async function resizeToContent() {
+  const layout = await getCatWindowLayout()
+  const monitor = layout?.monitor
+  const monitorScaleFactor = monitor?.scaleFactor ?? await appWindow.scaleFactor()
+  const availableWidth = monitor
+    ? monitor.workArea.size.width / monitorScaleFactor - SCREEN_MARGIN * 2
+    : DEFAULT_BUBBLE_WIDTH
+  const availableHeight = monitor
+    ? monitor.workArea.size.height / monitorScaleFactor - SCREEN_MARGIN * 2
+    : MAX_BUBBLE_HEIGHT
+  const width = Math.max(1, Math.min(DEFAULT_BUBBLE_WIDTH, availableWidth))
+
+  await appWindow.setSize(new LogicalSize(width, MIN_BUBBLE_HEIGHT))
+  await nextAnimationFrame()
+
+  const contentHeight = Math.ceil(
+    notificationElement.getBoundingClientRect().height + BUBBLE_VERTICAL_SPACE,
+  )
+  const height = Math.max(
+    1,
+    Math.min(Math.max(MIN_BUBBLE_HEIGHT, contentHeight), MAX_BUBBLE_HEIGHT, availableHeight),
+  )
+
+  await appWindow.setSize(new LogicalSize(width, height))
+}
+
+async function positionAboveCat() {
+  const layout = await getCatWindowLayout()
+  if (!layout) return
+
+  const { mainPosition, mainSize, monitor } = layout
+  const bubbleSize = await appWindow.outerSize()
   const centeredX = Math.round(mainPosition.x + (mainSize.width - bubbleSize.width) / 2)
   const aboveY = Math.round(mainPosition.y - bubbleSize.height + 18)
 
@@ -80,8 +130,11 @@ async function showNotification(notification: AiNotification) {
   titleElement.textContent = notification.title
   messageElement.textContent = notification.message
   notificationElement.hidden = false
+  notificationElement.classList.add('is-measuring')
 
   clearTimeout(closeTimer)
+  await resizeToContent().catch(() => {})
+  notificationElement.classList.remove('is-measuring')
   await positionAboveCat().catch(() => {})
   await appWindow.show()
   closeTimer = setTimeout(() => void destroyIfIdle(), 8000)
