@@ -19,6 +19,7 @@ import { useGamepad } from '@/composables/useGamepad'
 import { useModel } from '@/composables/useModel'
 import { useModelBehaviorShortcuts } from '@/composables/useModelBehaviorShortcuts'
 import { useTauriListen } from '@/composables/useTauriListen'
+import { useTray } from '@/composables/useTray'
 import { LISTEN_KEY } from '@/constants'
 import { hideWindow, setAlwaysOnTop, setTaskbarVisibility, showWindow } from '@/plugins/window'
 import { useCatStore } from '@/stores/cat'
@@ -43,6 +44,7 @@ const { stickActive } = useGamepad()
 
 useAppShortcuts()
 useModelBehaviorShortcuts()
+useTray()
 
 onMounted(startListening)
 

@@ -5,7 +5,6 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import UpdateApp from '@/components/update-app/index.vue'
-import { useTray } from '@/composables/useTray'
 import { useAppStore } from '@/stores/app'
 import { useGeneralStore } from '@/stores/general'
 import { useModelStore } from '@/stores/model'
@@ -17,7 +16,6 @@ import General from './components/general/index.vue'
 import Model from './components/model/index.vue'
 import Shortcut from './components/shortcut/index.vue'
 
-useTray()
 const appStore = useAppStore()
 const current = ref(0)
 const { t } = useI18n()
