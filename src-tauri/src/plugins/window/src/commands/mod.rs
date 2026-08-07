@@ -99,6 +99,8 @@ pub fn ensure_ai_notification_window<R: Runtime>(app_handle: &AppHandle<R>) {
         .inner_size(380.0, 124.0)
         .visible(false)
         .focused(false)
+        .focusable(false)
+        .accept_first_mouse(true)
         .shadow(false)
         .always_on_top(true)
         .transparent(true)
