@@ -25,6 +25,9 @@ const messageElement = document.querySelector<HTMLElement>('#message')!
 
 let closeTimer: ReturnType<typeof setTimeout> | undefined
 let polling = false
+let positionUpdatePending = false
+let positionUpdateRunning = false
+let stopFollowingCat: (() => void) | undefined
 
 const DEFAULT_BUBBLE_WIDTH = 380
 const MIN_BUBBLE_HEIGHT = 124
@@ -109,6 +112,38 @@ async function positionAboveCat() {
   await appWindow.setPosition(new PhysicalPosition(x, y))
 }
 
+function schedulePositionUpdate() {
+  if (notificationElement.hidden) return
+
+  positionUpdatePending = true
+  if (positionUpdateRunning) return
+
+  positionUpdateRunning = true
+  requestAnimationFrame(async () => {
+    do {
+      positionUpdatePending = false
+      await positionAboveCat().catch(() => {})
+    } while (positionUpdatePending && !notificationElement.hidden)
+
+    positionUpdateRunning = false
+  })
+}
+
+async function followCatWindow() {
+  const mainWindow = await WebviewWindow.getByLabel(WINDOW_LABEL.MAIN)
+  if (!mainWindow) return
+
+  const [unlistenMoved, unlistenResized] = await Promise.all([
+    mainWindow.onMoved(schedulePositionUpdate),
+    mainWindow.onResized(schedulePositionUpdate),
+  ])
+
+  stopFollowingCat = () => {
+    unlistenMoved()
+    unlistenResized()
+  }
+}
+
 async function hideIfIdle() {
   const notifications = await takePending()
   if (notifications.length > 0) {
@@ -165,7 +200,11 @@ notificationElement.addEventListener('click', () => {
   notificationElement.hidden = true
   void appWindow.hide()
 })
-window.addEventListener('beforeunload', () => clearTimeout(closeTimer))
+window.addEventListener('beforeunload', () => {
+  clearTimeout(closeTimer)
+  stopFollowingCat?.()
+})
 
+void followCatWindow()
 void poll()
 setInterval(() => void poll(), 250)
