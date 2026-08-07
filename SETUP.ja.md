@@ -107,8 +107,8 @@ task mac:build
 
 BongoCatを起動した状態で設定します。完了通知に加えて、承認待ちは `PermissionRequest` フックで通知します。
 
-- Windows: `~/.codex/config.toml` と `~/.codex/hooks.json` を設定
-- macOS: 同じ2ファイルから `integrations/bongocat-notify.sh` を実行
+- Windows: `~/.codex/hooks.json` の `Stop` と `PermissionRequest` を設定
+- macOS: 同じ2つのフックから `integrations/bongocat-notify.sh` を実行
 
 設定後にCodexを再起動し、最初の一度だけ `/hooks` を開いてBongoCat通知コマンドを許可してください。
 
@@ -156,4 +156,4 @@ Windowsで従来のスクリプトから設定する場合は次を実行しま�
 4. 設定内の通知スクリプトが実在する絶対パスになっているか
 5. SSH利用時は `RemoteForward 39284 127.0.0.1:39284` が有効か
 
-Codexの通常の `notify` は完了時に使用し、承認待ちは別の `PermissionRequest` フックで受け取ります。どちらか一方しか設定されていない場合は、通知が来る場面も片方だけになります。
+Codexのメインターン完了は `Stop`、承認待ちは `PermissionRequest` フックで受け取ります。サブエージェント完了だけを示す `SubagentStop` は通知対象にしていません。どちらか一方しか設定されていない場合は、通知が来る場面も片方だけになります。

@@ -62,6 +62,9 @@ fn notification_from_value(provider: &str, value: &Value) -> Option<AiNotificati
     }
     let event = text(&value, &["type", "notification_type", "hook_event_name"])
         .unwrap_or_else(|| "notification".into());
+    if provider == "codex" && event == "SubagentStop" {
+        return None;
+    }
     let cwd = text(&value, &["cwd"]);
     let project = cwd.as_deref().and_then(|path| {
         path.trim_end_matches(['/', '\\'])
@@ -312,6 +315,16 @@ mod tests {
 
         assert_eq!(notification.status, "attention");
         assert_eq!(notification.message, "Run the release build");
+    }
+
+    #[test]
+    fn ignores_codex_subagent_completion() {
+        let notification = notification_from_args(&args(
+            "codex",
+            r#"{"hook_event_name":"SubagentStop","last_assistant_message":"Review complete"}"#,
+        ));
+
+        assert!(notification.is_none());
     }
 
     #[test]

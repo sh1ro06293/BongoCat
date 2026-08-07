@@ -6,19 +6,23 @@ BongoCat を起動した状態で、AI エージェントの完了・入力待�
 
 ### Codex CLI
 
-`~/.codex/config.toml` に次を追加します。パスはこのリポジトリの実際の場所へ置き換えてください。
-
-```toml
-notify = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "D:\\hal\\BongoCat\\integrations\\bongocat-notify.ps1", "-Provider", "codex"]
-```
-
-Codex が末尾に追加する JSON 引数をスクリプトが BongoCat へ転送します。Codex CLI/TUI の `agent-turn-complete` に対応します。
-
-承認待ちも受け取るには、`~/.codex/hooks.json` の `hooks` に次を追加します。既存の hooks がある場合は上書きせず、`PermissionRequest` の配列へ要素を追加してください。
+`~/.codex/hooks.json` の `hooks` に次を追加します。パスはこのリポジトリの実際の場所へ置き換えてください。既存の hooks がある場合は上書きせず、`Stop` と `PermissionRequest` の配列へ要素を追加します。
 
 ```json
 {
   "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"D:\\hal\\BongoCat\\integrations\\bongocat-notify.ps1\" -Provider codex",
+            "timeout": 3,
+            "statusMessage": "Notifying BongoCat"
+          }
+        ]
+      }
+    ],
     "PermissionRequest": [
       {
         "hooks": [
@@ -34,6 +38,8 @@ Codex が末尾に追加する JSON 引数をスクリプトが BongoCat へ転�
   }
 }
 ```
+
+`Stop` はメインターン完了、`PermissionRequest` はユーザー承認待ちに対応します。自動的にメイン処理へ戻る `SubagentStop` は設定しません。以前の設定で `~/.codex/config.toml` の `notify` に BongoCat を登録している場合は、サブエージェント完了との重複を避けるためその行を削除してください。
 
 Codex を再起動し、最初の一度だけ `/hooks` を開いてこのコマンドを許可します。この確認は Codex の安全機能なので省略できません。
 
@@ -90,17 +96,23 @@ chmod +x /path/to/BongoCat/integrations/bongocat-notify.sh
 
 ### Codex CLI
 
-`~/.codex/config.toml` に追加します。
-
-```toml
-notify = ["/bin/sh", "/path/to/BongoCat/integrations/bongocat-notify.sh", "codex"]
-```
-
-承認待ちも受け取るには、`~/.codex/hooks.json` の `hooks` に追加します。
+`~/.codex/hooks.json` の `hooks` に追加します。
 
 ```json
 {
   "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/sh /path/to/BongoCat/integrations/bongocat-notify.sh codex",
+            "timeout": 3,
+            "statusMessage": "Notifying BongoCat"
+          }
+        ]
+      }
+    ],
     "PermissionRequest": [
       {
         "hooks": [
@@ -116,6 +128,8 @@ notify = ["/bin/sh", "/path/to/BongoCat/integrations/bongocat-notify.sh", "codex
   }
 }
 ```
+
+`Stop` はメインターン完了、`PermissionRequest` はユーザー承認待ちに対応します。自動的にメイン処理へ戻る `SubagentStop` は設定しません。以前の設定で `~/.codex/config.toml` の `notify` に BongoCat を登録している場合は、その行を削除してください。
 
 Codex を再起動し、最初の一度だけ `/hooks` を開いてこのコマンドを許可します。
 
@@ -193,18 +207,12 @@ mkdir -p ~/.local/bin
 chmod +x ~/.local/bin/bongocat-notify
 ```
 
-SSH先の `~/.codex/config.toml` には絶対パスで追加します。
-
-```toml
-notify = ["/bin/sh", "/home/your-user/.local/bin/bongocat-notify", "codex"]
-```
-
-承認待ちはSSH先の `~/.codex/hooks.json` にも `PermissionRequest` フックを追加します。Windowsの自動設定スクリプトを使う場合は自動で追加されます。設定後、SSH先のCodexを再起動し、最初の一度だけ `/hooks` で許可してください。
+SSH先の `~/.codex/hooks.json` に、絶対パスを使って `Stop` と `PermissionRequest` フックを追加します。Windowsの自動設定スクリプトを使う場合は自動で追加されます。設定後、SSH先のCodexを再起動し、最初の一度だけ `/hooks` で許可してください。
 
 接続中に次のコマンドで中継だけをテストできます。
 
 ```sh
-printf '%s' '{"type":"agent-turn-complete","cwd":"/tmp/ssh-test"}' |
+printf '%s' '{"hook_event_name":"Stop","cwd":"/tmp/ssh-test"}' |
   ~/.local/bin/bongocat-notify codex
 ```
 

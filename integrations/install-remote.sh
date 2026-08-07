@@ -11,22 +11,11 @@ chmod +x "$notifier"
 touch "$codex_config"
 cp "$codex_config" "$codex_config.bak"
 
-notify_line="notify = [\"/bin/sh\", \"$notifier\", \"codex\"]"
 temporary_config="$codex_config.tmp.$$"
 
-awk -v notify_line="$notify_line" '
-  /^notify[[:space:]]*=/ { next }
-  !inserted && /^\[/ {
-    print notify_line
-    print ""
-    inserted = 1
-  }
+awk '
+  /^notify[[:space:]]*=/ && /bongocat-notify/ { next }
   { print }
-  END {
-    if (!inserted) {
-      print notify_line
-    }
-  }
 ' "$codex_config" >"$temporary_config"
 
 mv "$temporary_config" "$codex_config"
@@ -50,23 +39,25 @@ else:
 
 command = f'/bin/sh "{notifier}" codex'
 hooks = settings.setdefault("hooks", {})
-groups = hooks.setdefault("PermissionRequest", [])
-already_configured = any(
-    hook.get("command") == command
-    for group in groups
-    for hook in group.get("hooks", [])
-    if isinstance(hook, dict)
-)
 
-if not already_configured:
-    groups.append({
-        "hooks": [{
-            "type": "command",
-            "command": command,
-            "timeout": 3,
-            "statusMessage": "Notifying BongoCat",
-        }]
-    })
+for event in ("PermissionRequest", "Stop"):
+    groups = hooks.setdefault(event, [])
+    already_configured = any(
+        hook.get("command") == command
+        for group in groups
+        for hook in group.get("hooks", [])
+        if isinstance(hook, dict)
+    )
+
+    if not already_configured:
+        groups.append({
+            "hooks": [{
+                "type": "command",
+                "command": command,
+                "timeout": 3,
+                "statusMessage": "Notifying BongoCat",
+            }]
+        })
 
 with hooks_path.open("w", encoding="utf-8") as file:
     json.dump(settings, file, ensure_ascii=False, indent=2)
