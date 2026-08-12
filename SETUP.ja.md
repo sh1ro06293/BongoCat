@@ -103,6 +103,12 @@ task mac:build
 
 詳しくは [BUILD_MACOS.ja.md](BUILD_MACOS.ja.md) を参照してください。
 
+すでにインストール済みで、最新ソースをpullしてある場合は次の1コマンドで更新できます。
+
+```sh
+task mac:update
+```
+
 ## Codex通知
 
 BongoCatを起動した状態で設定します。完了通知に加えて、承認待ちは `PermissionRequest` フックで通知します。

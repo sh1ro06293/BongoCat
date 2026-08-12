@@ -35,6 +35,14 @@ task mac:build
 task mac:output
 ```
 
+すでに `/Applications/BongoCat.app` をインストールしているMacでは、最新ソースをpullした後に次の1コマンドでビルドと更新を行えます。
+
+```sh
+task mac:update
+```
+
+DMGを作らず `.app` のみをビルドします。その後、実行中のBongoCatを終了し、既存版を `/private/tmp/BongoCat-before-update-<日時>.app` へ退避してから、新しいアプリを `/Applications` へインストールして起動します。Gitのpullはこのタスクに含まれません。
+
 ## 署名について
 
 この手順で生成するDMGはApple Developer署名と公証を行いません。そのため、初回起動時にmacOSの警告が表示される場合があります。一般配布する場合はApple Developer IDによる署名と公証を追加してください。
