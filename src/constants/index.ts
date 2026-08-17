@@ -18,6 +18,7 @@ export const INVOKE_KEY = {
   START_GAMEPAD_LISTING: 'start_gamepad_listing',
   STOP_GAMEPAD_LISTING: 'stop_gamepad_listing',
   TAKE_PENDING_AI_NOTIFICATIONS: 'take_pending_ai_notifications',
+  SET_CAT_VISIBILITY_FOR_AI_NOTIFICATIONS: 'set_cat_visibility_for_ai_notifications',
 }
 
 export const LANGUAGE = {

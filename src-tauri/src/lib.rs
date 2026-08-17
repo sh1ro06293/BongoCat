@@ -3,7 +3,8 @@ mod utils;
 
 use core::{
     ai_notification::{
-        PendingNotifications, receive, start_ssh_relay, take_pending_ai_notifications,
+        PendingNotifications, receive, set_cat_visibility_for_ai_notifications, start_ssh_relay,
+        take_pending_ai_notifications,
     },
     device::start_device_listening,
     gamepad::{start_gamepad_listing, stop_gamepad_listing},
@@ -33,6 +34,7 @@ pub fn run() {
         .invoke_handler(generate_handler![
             copy_dir,
             take_pending_ai_notifications,
+            set_cat_visibility_for_ai_notifications,
             start_device_listening,
             start_gamepad_listing,
             stop_gamepad_listing,

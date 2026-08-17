@@ -1,7 +1,10 @@
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
-    sync::Mutex,
+    sync::{
+        Mutex,
+        atomic::{AtomicBool, Ordering},
+    },
     thread,
     time::Duration,
 };
@@ -9,7 +12,7 @@ use std::{
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tauri::{AppHandle, Manager};
-use tauri_plugin_custom_window::ensure_ai_notification_window;
+use tauri_plugin_custom_window::{AI_NOTIFICATION_WINDOW_LABEL, ensure_ai_notification_window};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,12 +24,51 @@ pub struct AiNotification {
     pub project: Option<String>,
 }
 
-#[derive(Default)]
-pub struct PendingNotifications(pub Mutex<Vec<AiNotification>>);
+pub struct PendingNotifications {
+    pending: Mutex<Vec<AiNotification>>,
+    cat_visible: AtomicBool,
+}
+
+impl Default for PendingNotifications {
+    fn default() -> Self {
+        Self {
+            pending: Mutex::default(),
+            cat_visible: AtomicBool::new(true),
+        }
+    }
+}
+
+impl PendingNotifications {
+    fn is_cat_visible(&self) -> bool {
+        self.cat_visible.load(Ordering::SeqCst)
+    }
+
+    fn set_cat_visibility(&self, visible: bool) {
+        self.cat_visible.store(visible, Ordering::SeqCst);
+
+        if !visible {
+            self.take_pending();
+        }
+    }
+
+    fn take_pending(&self) -> Vec<AiNotification> {
+        self.pending
+            .lock()
+            .map(|mut pending| pending.drain(..).collect())
+            .unwrap_or_default()
+    }
+}
 
 fn enqueue(app: &AppHandle, notification: AiNotification) {
     if let Some(state) = app.try_state::<PendingNotifications>() {
-        if let Ok(mut pending) = state.0.lock() {
+        let cat_visible = state.is_cat_visible();
+        tauri_plugin_log::log::debug!("AI notification received (cat_visible={cat_visible})");
+
+        if !cat_visible {
+            return;
+        }
+
+        if let Ok(mut pending) = state.pending.lock() {
             pending.push(notification);
         }
     }
@@ -145,11 +187,23 @@ pub fn receive(app: &AppHandle, args: &[String], _queue: bool) -> bool {
 pub fn take_pending_ai_notifications(
     state: tauri::State<'_, PendingNotifications>,
 ) -> Vec<AiNotification> {
-    state
-        .0
-        .lock()
-        .map(|mut pending| pending.drain(..).collect())
-        .unwrap_or_default()
+    state.take_pending()
+}
+
+#[tauri::command]
+pub fn set_cat_visibility_for_ai_notifications(
+    app_handle: AppHandle,
+    state: tauri::State<'_, PendingNotifications>,
+    visible: bool,
+) {
+    tauri_plugin_log::log::debug!("Cat visibility changed for AI notifications: {visible}");
+    state.set_cat_visibility(visible);
+
+    if !visible {
+        if let Some(window) = app_handle.get_webview_window(AI_NOTIFICATION_WINDOW_LABEL) {
+            let _ = window.destroy();
+        }
+    }
 }
 
 fn relay_response(stream: &mut TcpStream, status: &str) {
@@ -335,5 +389,22 @@ mod tests {
     #[test]
     fn rejects_unknown_provider() {
         assert!(notification_from_args(&args("unknown", "{}")).is_none());
+    }
+
+    #[test]
+    fn hiding_cat_clears_pending_notifications() {
+        let state = PendingNotifications::default();
+        state.pending.lock().unwrap().push(AiNotification {
+            provider: "codex".into(),
+            status: "complete".into(),
+            title: "Complete".into(),
+            message: "Done".into(),
+            project: None,
+        });
+
+        state.set_cat_visibility(false);
+
+        assert!(!state.is_cat_visible());
+        assert!(state.take_pending().is_empty());
     }
 }

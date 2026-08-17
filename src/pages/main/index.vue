@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { MotionInfo } from 'easy-live2d'
 
-import { convertFileSrc } from '@tauri-apps/api/core'
+import { convertFileSrc, invoke } from '@tauri-apps/api/core'
 import { PhysicalSize } from '@tauri-apps/api/dpi'
 import { Menu, PredefinedMenuItem } from '@tauri-apps/api/menu'
 import { sep } from '@tauri-apps/api/path'
@@ -20,7 +20,7 @@ import { useModel } from '@/composables/useModel'
 import { useModelBehaviorShortcuts } from '@/composables/useModelBehaviorShortcuts'
 import { useTauriListen } from '@/composables/useTauriListen'
 import { useTray } from '@/composables/useTray'
-import { LISTEN_KEY } from '@/constants'
+import { INVOKE_KEY, LISTEN_KEY } from '@/constants'
 import { hideWindow, setAlwaysOnTop, setTaskbarVisibility, showWindow } from '@/plugins/window'
 import { useCatStore } from '@/stores/cat'
 import { useGeneralStore } from '@/stores/general.ts'
@@ -119,6 +119,7 @@ watch([modelStore.pressedKeys, stickActive], ([keys, stickActive]) => {
 }, { deep: true })
 
 watch(() => catStore.window.visible, async (value) => {
+  await invoke(INVOKE_KEY.SET_CAT_VISIBILITY_FOR_AI_NOTIFICATIONS, { visible: value })
   value ? showWindow() : hideWindow()
 })
 
