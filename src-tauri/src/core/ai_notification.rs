@@ -2,8 +2,8 @@ use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
     sync::{
-        Mutex,
         atomic::{AtomicBool, Ordering},
+        Mutex,
     },
     thread,
     time::Duration,
@@ -12,7 +12,7 @@ use std::{
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tauri::{AppHandle, Manager};
-use tauri_plugin_custom_window::{AI_NOTIFICATION_WINDOW_LABEL, ensure_ai_notification_window};
+use tauri_plugin_custom_window::{ensure_ai_notification_window, AI_NOTIFICATION_WINDOW_LABEL};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -173,9 +173,23 @@ fn notification_from_args(args: &[String]) -> Option<AiNotification> {
     notification_from_value(provider, &value)
 }
 
+fn is_ai_notification_invocation(args: &[String]) -> bool {
+    args.iter().any(|arg| arg == "--ai-notify-source")
+}
+
+/// Returns whether this process invocation was intended to deliver an AI notification.
+///
+/// An invocation remains handled when its notification is intentionally ignored or malformed.
+/// Otherwise the single-instance callback would mistake it for a normal app launch and open the
+/// preferences window.
 pub fn receive(app: &AppHandle, args: &[String], _queue: bool) -> bool {
+    let is_notification_invocation = is_ai_notification_invocation(args);
     let Some(notification) = notification_from_args(args) else {
-        return false;
+        if is_notification_invocation {
+            tauri_plugin_log::log::debug!("AI notification invocation ignored");
+        }
+
+        return is_notification_invocation;
     };
 
     enqueue(app, notification);
@@ -373,22 +387,32 @@ mod tests {
 
     #[test]
     fn ignores_codex_subagent_completion() {
-        let notification = notification_from_args(&args(
+        let request = args(
             "codex",
             r#"{"hook_event_name":"SubagentStop","last_assistant_message":"Review complete"}"#,
-        ));
+        );
+        let notification = notification_from_args(&request);
 
         assert!(notification.is_none());
+        assert!(is_ai_notification_invocation(&request));
     }
 
     #[test]
     fn rejects_invalid_payload() {
-        assert!(notification_from_args(&args("codex", "not json")).is_none());
+        let request = args("codex", "not json");
+
+        assert!(notification_from_args(&request).is_none());
+        assert!(is_ai_notification_invocation(&request));
     }
 
     #[test]
     fn rejects_unknown_provider() {
         assert!(notification_from_args(&args("unknown", "{}")).is_none());
+    }
+
+    #[test]
+    fn identifies_regular_app_launch() {
+        assert!(!is_ai_notification_invocation(&["bongo-cat".into()]));
     }
 
     #[test]

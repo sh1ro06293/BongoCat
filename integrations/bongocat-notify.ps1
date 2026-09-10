@@ -15,6 +15,25 @@ if ([string]::IsNullOrWhiteSpace($payload)) {
   $payload = '{}'
 }
 
+$relayPort = $env:BONGOCAT_RELAY_PORT
+if ([string]::IsNullOrWhiteSpace($relayPort)) {
+  $relayPort = '39284'
+}
+
+try {
+  Invoke-WebRequest `
+    -UseBasicParsing `
+    -Method Post `
+    -Uri "http://127.0.0.1:$relayPort/notify/$Provider" `
+    -ContentType 'application/json' `
+    -Body ([Text.Encoding]::UTF8.GetBytes($payload)) `
+    -TimeoutSec 2 | Out-Null
+  exit 0
+}
+catch {
+  # Start BongoCat below when the local relay is not running yet.
+}
+
 $candidates = @(@(
   $env:BONGOCAT_PATH,
   (Join-Path $env:ProgramFiles 'BongoCat\bongo-cat.exe'),
@@ -28,18 +47,6 @@ $candidates = @(@(
 ) | Where-Object { $_ -and (Test-Path -LiteralPath $_) })
 
 if ($candidates.Count -eq 0) {
-  try {
-    Invoke-WebRequest `
-      -UseBasicParsing `
-      -Method Post `
-      -Uri "http://127.0.0.1:39284/notify/$Provider" `
-      -ContentType 'application/json' `
-      -Body ([Text.Encoding]::UTF8.GetBytes($payload)) `
-      -TimeoutSec 2 | Out-Null
-  }
-  catch {
-    # Hooks must never interrupt the AI agent when the relay is unavailable.
-  }
   exit 0
 }
 
